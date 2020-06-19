@@ -212,6 +212,10 @@ namespace ExamTester
 
         private void btnJump_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrEmpty(this.txtPage.Text))
+            {
+                return;
+            }
             int iPage = int.Parse(this.txtPage.Text.Trim());
             if (iPage <= this._termsCount && this._dicTermDocs.Keys.Contains(iPage-1))
             {
