@@ -1,0 +1,35 @@
+﻿<Window x:Class="ExamTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExamTester"
+        mc:Ignorable="d"
+        Title="试题" Height="768" Width="1024" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <ToolBar Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Margin="10,10,0,0" VerticalAlignment="Top" Height="30" MinWidth="1000">
+            <ToolBarPanel Orientation="Horizontal" Margin="0,0,0,0"  HorizontalAlignment="Left" Width="655" >
+                <Button Content="打开题库目录" x:Name="btnOpenFolder" Click="btnOpenFolder_Click"></Button>
+                <Label x:Name="lblProcess" Content="第0题/共0题" Background="#FF060606" Foreground="#FFDFF105"  Margin="10,0,0,0"/>
+                <TextBox x:Name="txtPage" Width="50" TextAlignment="Right" Margin="10,0,0,0" MaxLength="3" PreviewTextInput="txtPage_PreviewTextInput" InputMethod.IsInputMethodEnabled="False" PreviewKeyDown="txtPage_PreviewKeyDown" >
+                </TextBox>
+                <Button Content="跳转" x:Name="btnJump" Height="26" Margin="0,0,0,0" VerticalAlignment="Center" Click="btnJump_Click"/>
+                <Button Content="查看答案" x:Name="btnViewAnswer" Height="26" Margin="100,0,0,0" Width="150" VerticalAlignment="Center" Click="btnViewAnswer_Click"/>
+            </ToolBarPanel>
+            <ToolBarPanel Orientation="Horizontal" Margin="0,0,0,0"  HorizontalAlignment="Right" Width="300" FlowDirection="RightToLeft" >
+                <Button Content="下一题" x:Name="btnNext" Click="btnNext_Click" Margin="10,0,0,0" Width="100" ></Button>
+                <Button Content="上一题" x:Name="btnPrev" Click="btnPrev_Click" Margin="10,0,0,0"  Width="100"></Button>
+            </ToolBarPanel>
+        </ToolBar>
+        <ScrollViewer Grid.Row="1" Grid.Column="0" >
+            <DocumentViewer x:Name="docViewer"/>
+        </ScrollViewer>
+    </Grid>
+</Window>
