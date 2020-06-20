@@ -33,5 +33,15 @@ namespace ExamTester
                 docViewer.FitToWidth();
             }
         }
+
+        /// <summary>
+        /// Scrollviewer加上触屏滚动
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
+        {
+            e.Handled = true;
+        }
     }
 }

@@ -200,6 +200,15 @@ namespace ExamTester
 
             wordApplication.Quit(WdSaveOptions.wdDoNotSaveChanges);
         }
+        /// <summary>
+        /// Scrollviewer加上触屏滚动
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
+        {
+            e.Handled = true;
+        }
         private XpsDocument ConvertWordToXPS2(string wordDocName, Microsoft.Office.Interop.Word.Application wordApplication)
         {
             FileInfo fi = new FileInfo(wordDocName);

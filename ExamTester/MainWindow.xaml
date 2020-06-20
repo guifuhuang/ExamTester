@@ -28,8 +28,6 @@
                 <Button Content="上一题" x:Name="btnPrev" Click="btnPrev_Click" Margin="10,0,0,0"  Width="100"></Button>
             </ToolBarPanel>
         </ToolBar>
-        <ScrollViewer Grid.Row="1" Grid.Column="0" >
-            <DocumentViewer x:Name="docViewer"/>
-        </ScrollViewer>
+        <DocumentViewer Grid.Row="1" Grid.Column="0" x:Name="docViewer" ScrollViewer.PanningMode="Both" ManipulationBoundaryFeedback="SCManipulationBoundaryFeedback" />
     </Grid>
 </Window>
