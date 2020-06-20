@@ -38,7 +38,8 @@ namespace ExamTester
         private Dictionary<int, XpsDocument> _dicTermDocs = new Dictionary<int, XpsDocument>();
         // 所有答案的索引
         private Dictionary<int, XpsDocument> _dicAnswerDocs = new Dictionary<int, XpsDocument>();
-
+        // 
+        //Microsoft.Office.Interop.Word.Application _wordApplication = null;
         public MainWindow()
         {
             InitializeComponent();
@@ -46,8 +47,7 @@ namespace ExamTester
 
         private void Init()
         {
-            //string wordDocName = @"C:\Users\GuiFuHuang\Documents\Azure\AZ-203\examtopics.docx";
-            //this.Loaddoc(wordDocName);
+            //this._wordApplication = new Microsoft.Office.Interop.Word.Application();
         }
         private void Loaddoc(string wordDocName)
         {
@@ -134,7 +134,13 @@ namespace ExamTester
         {
             FileInfo fi = new FileInfo(wordDocName);
             XpsDocument result = null;
-            string xpsDocName = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.InternetCache), fi.Name);
+            //string xpsDocName = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.InternetCache), fi.Name);
+            string xpsFolderPath = System.IO.Path.Combine(this._termsFolderPath, "t");
+            if (!Directory.Exists(xpsFolderPath))
+            {
+                Directory.CreateDirectory(xpsFolderPath);
+            }
+            string xpsDocName = System.IO.Path.Combine(xpsFolderPath, fi.Name);
             xpsDocName = xpsDocName.Replace(".docx", ".xps").Replace(".doc", ".xps");
             Microsoft.Office.Interop.Word.Application wordApplication = new Microsoft.Office.Interop.Word.Application();
             try
@@ -145,11 +151,12 @@ namespace ExamTester
                     Document doc = wordApplication.ActiveDocument;
                     doc.ExportAsFixedFormat(xpsDocName, WdExportFormat.wdExportFormatXPS, false, WdExportOptimizeFor.wdExportOptimizeForPrint, WdExportRange.wdExportAllDocument, 0, 0, WdExportItem.wdExportDocumentContent, true, true, WdExportCreateBookmarks.wdExportCreateHeadingBookmarks, true, true, false, Type.Missing);
                     result = new XpsDocument(xpsDocName, System.IO.FileAccess.Read);
+                    Console.WriteLine(string.Format("生成{0}",xpsDocName));
                 }
-
-                if (File.Exists(xpsDocName))
+                else
                 {
                     result = new XpsDocument(xpsDocName, FileAccess.Read);
+                    Console.WriteLine(string.Format("找到{0}", xpsDocName));
                 }
 
             }
@@ -161,6 +168,74 @@ namespace ExamTester
 
             wordApplication.Quit(WdSaveOptions.wdDoNotSaveChanges);
 
+            return result;
+        }
+        private async System.Threading.Tasks.Task ConvertAll()
+        {
+            Microsoft.Office.Interop.Word.Application wordApplication = new Microsoft.Office.Interop.Word.Application();
+            await System.Threading.Tasks.Task.Run(() => {
+                try
+                {
+                    foreach (var key in this._dicTerms.Keys)
+                    {
+                        string filePath = System.IO.Path.Combine(this._dicTerms[key].Directory.FullName, this._dicTerms[key].Name);
+                        XpsDocument xpsDoc = ConvertWordToXPS2(filePath, wordApplication);
+                        this._dicTermDocs.Add(key, xpsDoc);
+                        //if (key == 0)
+                        //{
+                        //    this.LoaddocByIndex();
+                        //}
+                        string answerFilePath = System.IO.Path.Combine(this._dicTerms[key].Directory.FullName, "a", "a" + this._dicTerms[key].Name);
+                        XpsDocument xpsAnswerDoc = ConvertWordToXPS2(answerFilePath, wordApplication);
+                        this._dicAnswerDocs.Add(key, xpsAnswerDoc);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    string error = ex.Message;
+                    wordApplication.Quit(WdSaveOptions.wdDoNotSaveChanges);
+                }
+            });
+
+            wordApplication.Quit(WdSaveOptions.wdDoNotSaveChanges);
+        }
+        private XpsDocument ConvertWordToXPS2(string wordDocName, Microsoft.Office.Interop.Word.Application wordApplication)
+        {
+            FileInfo fi = new FileInfo(wordDocName);
+            XpsDocument result = null;
+            //string xpsDocName = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.InternetCache), fi.Name);
+            string xpsFolderPath = System.IO.Path.Combine(this._termsFolderPath, "t");
+            if (!Directory.Exists(xpsFolderPath))
+            {
+                Directory.CreateDirectory(xpsFolderPath);
+            }
+            string xpsDocName = System.IO.Path.Combine(xpsFolderPath, fi.Name);
+            xpsDocName = xpsDocName.Replace(".docx", ".xps").Replace(".doc", ".xps");
+            if (!File.Exists(xpsDocName))
+            {
+                try
+                {
+                    Document doc = wordApplication.Documents.Add(wordDocName);
+                    // 关闭Word的拼写检查就行了。
+                    doc.SpellingChecked = false;
+                    doc.ShowSpellingErrors = false;
+
+                    
+                    doc.ExportAsFixedFormat(xpsDocName, WdExportFormat.wdExportFormatXPS, false, WdExportOptimizeFor.wdExportOptimizeForPrint, WdExportRange.wdExportAllDocument, 0, 0, WdExportItem.wdExportDocumentContent, true, true, WdExportCreateBookmarks.wdExportCreateHeadingBookmarks, true, true, false, Type.Missing);
+                    result = new XpsDocument(xpsDocName, System.IO.FileAccess.Read);
+                    Console.WriteLine(string.Format("生成{0}", xpsDocName));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(string.Format("生成{0},出错了:{1}", xpsDocName, ex.Message));
+                }
+            }
+            else
+            {
+                result = new XpsDocument(xpsDocName, FileAccess.Read);
+                Console.WriteLine(string.Format("找到{0}", xpsDocName));
+            }
             return result;
         }
         private void SetProcessPage()
@@ -191,10 +266,11 @@ namespace ExamTester
                     this._dicTerms.Add(i, files[i]);
                 }
                 this._termsCount = this._dicTerms.Count;
+                this.ConvertAll();
                 // 加载问题
-                this.LoadAllDocsAsync();
-                // 加载答案
-                this.LoadAllAnswerDocsAsync();
+                //this.LoadAllDocsAsync();
+                //// 加载答案
+                //this.LoadAllAnswerDocsAsync();
             }
         }
 
@@ -255,8 +331,19 @@ namespace ExamTester
 
         private void btnViewAnswer_Click(object sender, RoutedEventArgs e)
         {
-            ViewAnswerForm viewForm = new ViewAnswerForm(this._dicAnswerDocs[this._currentTermIndex]);
-            viewForm.ShowDialog();
+            if (this._dicAnswerDocs.Keys.Contains(this._currentTermIndex))
+            {
+                ViewAnswerForm viewForm = new ViewAnswerForm(this._dicAnswerDocs[this._currentTermIndex]);
+                viewForm.ShowDialog();
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            //if (this._wordApplication != null)
+            //{
+            //    this._wordApplication.Quit();
+            //}
         }
     }
 }
