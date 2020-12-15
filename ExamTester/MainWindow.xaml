@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExamTester"
         mc:Ignorable="d"
-        Title="试题" Height="768" Width="1024" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing">
+        Title="试题" Height="768" Width="1024" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" WindowState="Maximized" Closing="Window_Closing"
+        PreviewKeyDown="Window_PreviewKeyDown">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>

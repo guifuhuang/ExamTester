@@ -38,6 +38,8 @@ namespace ExamTester
         private Dictionary<int, XpsDocument> _dicTermDocs = new Dictionary<int, XpsDocument>();
         // 所有答案的索引
         private Dictionary<int, XpsDocument> _dicAnswerDocs = new Dictionary<int, XpsDocument>();
+        // 所有历史path
+        private List<String> _lstPath = new List<string>();
         // 
         //Microsoft.Office.Interop.Word.Application _wordApplication = null;
         public MainWindow()
@@ -48,6 +50,30 @@ namespace ExamTester
         private void Init()
         {
             //this._wordApplication = new Microsoft.Office.Interop.Word.Application();
+            //加载保存过的记录
+            this.LoadHistory();
+        }
+        /// <summary>
+        /// 加载保存的历史记录
+        /// </summary>
+        private void LoadHistory()
+        {
+            string filename = "history.txt";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string cfgName = System.IO.Path.Combine(path, "ExamTester", filename);
+            this._lstPath = new List<string>();
+            if (File.Exists(cfgName))
+            {
+                string content = File.ReadAllText(cfgName);
+                string[] arrPath = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                foreach (string str in arrPath)
+                {
+                    if (!string.IsNullOrWhiteSpace(str) && !this._lstPath.Contains(str))
+                    {
+                        this._lstPath.Add(str);
+                    }
+                }
+            }
         }
         private void Loaddoc(string wordDocName)
         {
@@ -250,6 +276,7 @@ namespace ExamTester
         private void SetProcessPage()
         {
             this.lblProcess.Content = string.Format("第{0}页/共{1}页", (this._currentTermIndex + 1).ToString(), this._termsCount.ToString());
+            this.txtPage.Text = (this._currentTermIndex + 1).ToString();
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -262,9 +289,45 @@ namespace ExamTester
         /// <param name="e"></param>
         private void btnOpenFolder_Click(object sender, RoutedEventArgs e)
         {
+            History history = History.Instance();
+            history.Owner = this;
+            history.PathList = this._lstPath;
+            bool? dialogResult = history.ShowDialog();
+            if (dialogResult != null && (bool)dialogResult && !string.IsNullOrEmpty(history.SelectedPath) && this._lstPath.Contains(history.SelectedPath))
+            {
+                this._termsFolderPath = history.SelectedPath;
+                this._currentTermIndex = 0;
+                this._dicTerms = new Dictionary<int, FileInfo>();
+                DirectoryInfo di = new DirectoryInfo(this._termsFolderPath);
+                FileInfo[] files = di.GetFiles();
+                for (int i = 0; i < files.Length; i++)
+                {
+                    this._dicTerms.Add(i, files[i]);
+                }
+                this._termsCount = this._dicTerms.Count;
+                this.ConvertAll();
+                return;
+            }
+
             System.Windows.Forms.FolderBrowserDialog openFileDialog = new System.Windows.Forms.FolderBrowserDialog();
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                if (this._lstPath.Contains(openFileDialog.SelectedPath))
+                {
+                    this._lstPath.Remove(openFileDialog.SelectedPath);
+                }
+                this._lstPath.Add(openFileDialog.SelectedPath);
+                //StringBuilder sb = new StringBuilder();
+                //foreach (string str in this._lstPath)
+                //{
+                //    sb.AppendLine(str);
+                //}
+                //string filename = "history.txt";
+                //string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                //string cfgName = System.IO.Path.Combine(path,"ExamTester", filename);
+
+                //IoHelper.SaveStringToFilePath(cfgName, sb.ToString());
+
                 this._termsFolderPath = openFileDialog.SelectedPath;
                 this._currentTermIndex = 0;
                 this._dicTerms = new Dictionary<int, FileInfo>();
@@ -353,6 +416,28 @@ namespace ExamTester
             //{
             //    this._wordApplication.Quit();
             //}
+            StringBuilder sb = new StringBuilder();
+            foreach (string str in this._lstPath)
+            {
+                sb.AppendLine(str);
+            }
+            string filename = "history.txt";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string cfgName = System.IO.Path.Combine(path, "ExamTester", filename);
+
+            IoHelper.SaveStringToFilePath(cfgName, sb.ToString());
+        }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Right)
+            {
+                this.btnNext_Click(this.btnNext, null);
+            }
+            else if (e.Key == Key.Left)
+            {
+                this.btnPrev_Click(this.btnPrev, null);
+            }
         }
     }
 }

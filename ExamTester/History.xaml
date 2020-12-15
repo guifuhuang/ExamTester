@@ -1,0 +1,38 @@
+﻿<Window x:Class="ExamTester.History"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExamTester"
+        mc:Ignorable="d"
+        Loaded="Window_Loaded"
+        Title="History" Height="300" Width="520">
+    <Grid>
+        <ListView Name="lv" SelectedValuePath="Value" SelectionMode="Single" MouseDoubleClick="lv_MouseDoubleClick">
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn Header="路径" Width="450">
+                            <!--<GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox Text="{Binding Path=.}" Width="100" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>-->
+                        </GridViewColumn>
+                        <GridViewColumn Header="路径" Width="50">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="删除" Tag="{Binding Path=.}" Click="btnDelete_Click"></Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>
