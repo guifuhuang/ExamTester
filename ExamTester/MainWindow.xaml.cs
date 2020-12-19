@@ -438,6 +438,10 @@ namespace ExamTester
             {
                 this.btnPrev_Click(this.btnPrev, null);
             }
+            else if(e.Key == Key.Enter)
+            {
+                this.btnViewAnswer_Click(this.btnViewAnswer, null);
+            }
         }
     }
 }

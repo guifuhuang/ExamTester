@@ -43,5 +43,13 @@ namespace ExamTester
         {
             e.Handled = true;
         }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                this.Close();
+            }
+        }
     }
 }
