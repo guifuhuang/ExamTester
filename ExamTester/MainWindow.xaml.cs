@@ -196,10 +196,10 @@ namespace ExamTester
 
             return result;
         }
-        private async System.Threading.Tasks.Task ConvertAll()
+        private async System.Threading.Tasks.Task<bool> ConvertAll()
         {
             Microsoft.Office.Interop.Word.Application wordApplication = new Microsoft.Office.Interop.Word.Application();
-            await System.Threading.Tasks.Task.Run(() => {
+            bool rst = await System.Threading.Tasks.Task.Run(() => {
                 try
                 {
                     foreach (var key in this._dicTerms.Keys)
@@ -209,22 +209,30 @@ namespace ExamTester
                         this._dicTermDocs.Add(key, xpsDoc);
                         //if (key == 0)
                         //{
+                        //    this._currentTermIndex = 0;
                         //    this.LoaddocByIndex();
                         //}
                         string answerFilePath = System.IO.Path.Combine(this._dicTerms[key].Directory.FullName, "a", "a" + this._dicTerms[key].Name);
                         XpsDocument xpsAnswerDoc = ConvertWordToXPS2(answerFilePath, wordApplication);
                         this._dicAnswerDocs.Add(key, xpsAnswerDoc);
                     }
-
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     string error = ex.Message;
                     wordApplication.Quit(WdSaveOptions.wdDoNotSaveChanges);
+                    return false;
                 }
             });
 
             wordApplication.Quit(WdSaveOptions.wdDoNotSaveChanges);
+            if (rst)
+            {
+                this._currentTermIndex = 0;
+                this.LoaddocByIndex();
+            }
+            return rst;
         }
         /// <summary>
         /// Scrollviewer加上触屏滚动
@@ -305,7 +313,12 @@ namespace ExamTester
                     this._dicTerms.Add(i, files[i]);
                 }
                 this._termsCount = this._dicTerms.Count;
-                this.ConvertAll();
+                Task<bool> tsk = this.ConvertAll();
+                //if (tsk.Result)
+                //{
+                //    this._currentTermIndex = 0;
+                //    this.LoaddocByIndex();
+                //}
                 return;
             }
 
@@ -338,11 +351,12 @@ namespace ExamTester
                     this._dicTerms.Add(i, files[i]);
                 }
                 this._termsCount = this._dicTerms.Count;
-                this.ConvertAll();
-                // 加载问题
-                //this.LoadAllDocsAsync();
-                //// 加载答案
-                //this.LoadAllAnswerDocsAsync();
+                Task<bool> tsk = this.ConvertAll();
+                //if (tsk.Result)
+                //{
+                //    this._currentTermIndex = 0;
+                //    this.LoaddocByIndex();
+                //}
             }
         }
 
